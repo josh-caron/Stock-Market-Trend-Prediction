@@ -1,4 +1,4 @@
-from utils import load_stock_data
+from helper import load_stock_data
 from sma import compute_sma, sma_signal, evaluate_sma
 from linear_regression import train_and_predict, regression_signal, evaluate_regression
 
