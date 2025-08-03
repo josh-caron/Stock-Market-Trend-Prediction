@@ -30,5 +30,25 @@ def train_and_predict(df):
     plt.ylabel('Price')
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('../plots/lr_plot.png')
+    plt.savefig('plots/lr_plot.png')
     plt.close()
+
+def regression_signal(df):
+    df['Prev_Close'] = df['Close'].shift(1)
+    df.dropna(inplace=True)
+
+    X = df[['Prev_Close']].values
+    y = df['Close'].values
+
+    model = LinearRegression()
+    model.fit(X, y)
+    predicted_price = model.predict([[df['Close'].iloc[-1]]])[0]
+    current_price = df['Close'].iloc[-1]
+    signal = "BUY (Predicted > Current)" if predicted_price > current_price else "SELL (Predicted < Current)"
+    return {
+        "predicted": predicted_price,
+        "current": current_price,
+        "signal": signal,
+        "slope": model.coef_[0],
+        "intercept": model.intercept_
+    }
