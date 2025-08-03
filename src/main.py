@@ -1,5 +1,4 @@
 # src/main.py
-import os
 from helper import load_stock_data
 from sma import compute_sma, sma_signal
 from linear_regression import train_and_predict, regression_signal
@@ -14,7 +13,6 @@ def display_menu():
     return input("\n> Select option: ")
 
 def main():
-    os.makedirs("plots", exist_ok=True)
     df = None
     sma_result = None
     lr_result = None
@@ -23,7 +21,8 @@ def main():
         choice = display_menu()
 
         if choice == '1':
-            df = load_stock_data("AAPL")
+            ticker = input("Enter the ticker of the stock you want to predict: ")
+            df = load_stock_data(ticker)
             print("\nDataset loaded.\n")
 
         elif choice == '2':
