@@ -2,7 +2,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 import numpy as np
 import matplotlib.pyplot as plt
-
+# test
 def train_and_predict(df):
     df['Prev_Close'] = df['Close'].shift(1)
     df.dropna(inplace=True)
