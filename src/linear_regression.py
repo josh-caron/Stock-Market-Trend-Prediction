@@ -30,5 +30,5 @@ def train_and_predict(df):
     plt.ylabel('Price')
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('plots/lr_plot.png')
+    plt.savefig('../plots/lr_plot.png')
     plt.close()
