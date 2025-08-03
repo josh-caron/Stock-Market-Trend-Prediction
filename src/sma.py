@@ -16,7 +16,7 @@ def compute_sma(df, window=50):
     plt.ylabel('Price')
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('plots/sma_plot.png')
+    plt.savefig('../plots/sma_plot.png')
     plt.close()
 
 
