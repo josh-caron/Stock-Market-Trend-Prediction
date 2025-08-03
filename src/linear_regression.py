@@ -1,54 +1,79 @@
+import time
+import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
-import numpy as np
 import matplotlib.pyplot as plt
 
+
 def train_and_predict(df):
-    df['Prev_Close'] = df['Close'].shift(1)
-    df.dropna(inplace=True)
-
-    X = df[['Prev_Close']].values
-    y = df['Close'].values
-
-    split = int(0.8 * len(df))
+    """
+    Train on first 80% and plot predictions vs. actual on last 20%.
+    """
+    data = df.copy()
+    data['Prev_Close'] = data['Close'].shift(1)
+    data = data.dropna().reset_index(drop=True)
+    X = data[['Prev_Close']].values
+    y = data['Close'].values
+    split = int(0.8 * len(data))
     X_train, X_test = X[:split], X[split:]
     y_train, y_test = y[:split], y[split:]
-
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-    predictions = model.predict(X_test)
-
-    mse = mean_squared_error(y_test, predictions)
-    print(f'Mean Squared Error: {mse:.4f}')
-
+    model = LinearRegression().fit(X_train, y_train)
+    preds = model.predict(X_test)
+    mse = mean_squared_error(y_test, preds)
+    print(f"Mean Squared Error: {mse:.4f}")
     plt.figure(figsize=(12, 6))
-    plt.plot(df['Date'][split:], y_test, label='Actual')
-    plt.plot(df['Date'][split:], predictions, label='Predicted')
+    plt.plot(data['Date'][split:], y_test, label='Actual')
+    plt.plot(data['Date'][split:], preds, label='Predicted')
     plt.legend()
     plt.title('Linear Regression Prediction')
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('plots/lr_plot.png')
+    plt.savefig('../plots/lr_plot.png')
     plt.close()
 
+
 def regression_signal(df):
-    df['Prev_Close'] = df['Close'].shift(1)
-    df.dropna(inplace=True)
+    """
+    Compute next-day prediction and BUY/SELL signal for the last data point.
+    """
+    data = df.copy()
+    data['Prev_Close'] = data['Close'].shift(1)
+    data = data.dropna().reset_index(drop=True)
+    X = data[['Prev_Close']].values
+    y = data['Close'].values
+    model = LinearRegression().fit(X, y)
+    last_prev = X[-1][0]
+    predicted = model.predict([[last_prev]])[0]
+    current = y[-1]
+    signal = "BUY (Predicted > Current)" if predicted > current else "SELL (Predicted < Current)"
+    return {"predicted": predicted, "current": current, "signal": signal,
+            "slope": model.coef_[0], "intercept": model.intercept_}
 
-    X = df[['Prev_Close']].values
-    y = df['Close'].values
 
-    model = LinearRegression()
-    model.fit(X, y)
-    predicted_price = model.predict([[df['Close'].iloc[-1]]])[0]
-    current_price = df['Close'].iloc[-1]
-    signal = "BUY (Predicted > Current)" if predicted_price > current_price else "SELL (Predicted < Current)"
-    return {
-        "predicted": predicted_price,
-        "current": current_price,
-        "signal": signal,
-        "slope": model.coef_[0],
-        "intercept": model.intercept_
-    }
+def evaluate_regression(df):
+    """
+    Evaluate Linear Regression strategy similarly to SMA:
+      - Accuracy, ROI, Duration
+    """
+    start = time.time()
+    data = df.copy()
+    data['Prev_Close'] = data['Close'].shift(1)
+    data = data.dropna().reset_index(drop=True)
+    X = data[['Prev_Close']].values
+    y = data['Close'].values
+    split = int(0.8 * len(data))
+    X_train, X_test = X[:split], X[split:]
+    y_train, y_test = y[:split], y[split:]
+    model = LinearRegression().fit(X_train, y_train)
+    preds = model.predict(X_test)
+    duration = time.time() - start
+    # directional signals
+    signals = preds > X_test[:, 0]
+    actual_up = y_test > X_test[:, 0]
+    accuracy = np.mean(signals == actual_up) * 100
+    profit = (y_test - X_test[:, 0])[signals].sum()
+    trades = X_test[:, 0][signals]
+    roi = (profit / trades.sum()) * 100 if trades.sum() else 0.0
+    return {"accuracy": accuracy, "roi": roi, "duration": duration}
