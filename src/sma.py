@@ -6,10 +6,14 @@ import os
 
 def compute_sma(df, window=50):
     os.makedirs('plots', exist_ok=True)
+    df = df.copy()
     df[f'SMA_{window}'] = df['Close'].rolling(window=window).mean()
     plt.figure(figsize=(12, 6))
-    plt.plot(df['Date'], df['Close'], label='Close Price')
-    plt.plot(df['Date'], df[f'SMA_{window}'], label=f'SMA {window}')
+    # Plot Close in blue
+    plt.plot(df['Date'], df['Close'], label='Close Price', color='royalblue', linewidth=1)
+    # Plot SMA in thick red
+    valid = ~df[f'SMA_{window}'].isna()
+    plt.plot(df['Date'][valid], df[f'SMA_{window}'][valid], label=f'SMA {window}', color='red', linewidth=3)
     plt.legend()
     plt.title(f'Simple Moving Average ({window}-day)')
     plt.xlabel('Date')
@@ -21,6 +25,7 @@ def compute_sma(df, window=50):
     plt.close()
 
 def sma_signal(df, window=50):
+    df = df.copy()
     df[f'SMA_{window}'] = df['Close'].rolling(window=window).mean()
     current_price = df['Close'].iloc[-1].item()
     current_sma = df[f'SMA_{window}'].iloc[-1].item()
@@ -36,7 +41,7 @@ def evaluate_sma(df, window=50):
     data['SMA'] = data['Close'].rolling(window=window).mean()
     data = data.dropna().reset_index(drop=True)
 
-    prices = data['Close'].values.flatten()  # shape (N,)
+    prices = data['Close'].values.flatten()
     sma = data['SMA'].values.flatten()
     signals = prices > sma
     if len(prices) < 2:
