@@ -1,6 +1,7 @@
 from helper import load_stock_data
 from sma import compute_sma, sma_signal, evaluate_sma
 from linear_regression import train_and_predict, regression_signal, evaluate_regression
+from plots_Combined import plot_combined
 
 def display_menu():
     print("=== Stock Trend Predictor by Josh Caron and Nico Lara ===")
@@ -49,9 +50,7 @@ def main():
         if choice == '1':
             ticker = input("Enter the ticker of the stock you want to predict: ")
             df = load_stock_data(ticker)
-
-
-            print(f"\nDataset for {ticker.upper()} loaded.\n")
+            print(f"\nDataset for {ticker.upper()} loaded with {len(df)} rows.\n")
         elif choice == '2':
             if df is None:
                 print("\nPlease load the dataset first.\n")
@@ -74,7 +73,6 @@ def main():
             if df is None:
                 print("\nPlease load the dataset first.\n")
                 continue
-            # Always recompute everything for accuracy
             sma_last = sma_signal(df)
             lr_last = regression_signal(df)
             sma_metrics = evaluate_sma(df)
@@ -82,12 +80,13 @@ def main():
             print_sma_results(sma_last)
             print_lr_results(lr_last)
             print_comparison(sma_metrics, lr_metrics)
-            # Only show graphs, never modify df here
-            choice_v = input("[Press 'S' for SMA graph, 'L' for LR graph, Any key to continue...]\n")
+            choice_v = input("[Press 'S' for SMA graph, 'L' for LR graph, 'B' for BOTH, Any key to continue...]\n")
             if choice_v.strip().lower() == 's':
                 compute_sma(df)
             elif choice_v.strip().lower() == 'l':
                 train_and_predict(df)
+            elif choice_v.strip().lower() == 'b':
+                plot_combined(df)
 
         elif choice == '5':
             print("\nExiting program. Goodbye!\n")

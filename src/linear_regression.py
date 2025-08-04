@@ -1,14 +1,10 @@
 import time
 import numpy as np
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
-import os
 
 def train_and_predict(df):
-    """
-    Train on first 80% and plot predictions vs. actual on last 20%.
-    """
+    import os
     os.makedirs('plots', exist_ok=True)
     data = df.copy()
     data['Prev_Close'] = data['Close'].shift(1)
@@ -23,26 +19,21 @@ def train_and_predict(df):
     y_train, y_test = y[:split], y[split:]
     model = LinearRegression().fit(X_train, y_train)
     preds = model.predict(X_test)
-    mse = mean_squared_error(y_test, preds) if len(y_test) else float('nan')
-    print(f"Mean Squared Error: {mse:.4f}")
-    if len(y_test):
-        plt.figure(figsize=(12, 6))
-        plt.plot(data['Date'][split:], y_test, label='Actual')
-        plt.plot(data['Date'][split:], preds, label='Predicted')
-        plt.legend()
-        plt.title('Linear Regression Prediction')
-        plt.xlabel('Date')
-        plt.ylabel('Price')
-        plt.grid(True)
-        plt.tight_layout()
-        plt.savefig('plots/lr_plot.png')
-        plt.show()
-        plt.close()
+    plt.figure(figsize=(12, 6))
+    plt.plot(data['Date'][split:], y_test, label='Actual', color='royalblue')
+    plt.plot(data['Date'][split:], preds, label='Predicted', color='orange', linewidth=2)
+    plt.legend()
+    plt.title('Linear Regression Prediction')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig('plots/lr_plot.png')
+    plt.show()
+    plt.close()
 
 def regression_signal(df):
-    """
-    Compute next-day prediction and BUY/SELL signal for the last data point.
-    """
+    from sklearn.linear_model import LinearRegression
     data = df.copy()
     data['Prev_Close'] = data['Close'].shift(1)
     data = data.dropna().reset_index(drop=True)
@@ -59,11 +50,8 @@ def regression_signal(df):
             "slope": float(model.coef_[0]), "intercept": float(model.intercept_)}
 
 def evaluate_regression(df):
-    """
-    Evaluate Linear Regression strategy similarly to SMA:
-      - Accuracy, ROI, Duration
-    """
     start = time.time()
+    from sklearn.linear_model import LinearRegression
     data = df.copy()
     data['Prev_Close'] = data['Close'].shift(1)
     data = data.dropna().reset_index(drop=True)
