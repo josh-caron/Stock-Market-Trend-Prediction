@@ -49,29 +49,31 @@ def regression_signal(df):
     return {"predicted": predicted, "current": current, "signal": signal,
             "slope": float(model.coef_[0]), "intercept": float(model.intercept_)}
 
+
 def evaluate_regression(df):
-    start = time.time()
+    import time
+    import numpy as np
     from sklearn.linear_model import LinearRegression
-    data = df.copy()
-    data['Prev_Close'] = data['Close'].shift(1)
-    data = data.dropna().reset_index(drop=True)
-    if len(data) < 2:
-        return {"accuracy": 0.0, "roi": 0.0, "duration": 0.0}
-    X = data[['Prev_Close']].values.flatten().reshape(-1,1)
-    y = data['Close'].values.flatten()
-    split = int(0.8 * len(data))
-    X_train, X_test = X[:split], X[split:]
-    y_train, y_test = y[:split], y[split:]
-    if len(X_test) == 0:
-        return {"accuracy": 0.0, "roi": 0.0, "duration": 0.0}
-    model = LinearRegression().fit(X_train, y_train)
-    preds = model.predict(X_test)
+
+    start = time.time()
+    data = df[['Close']].copy().reset_index(drop=True)
+
+    if len(data) < 3:
+        return {"accuracy": 0.0, "duration": 0.0}
+
+    X = np.arange(len(data) - 1).reshape(-1, 1)
+    y = data['Close'].values[:-1]
+
+    model = LinearRegression()
+    model.fit(X, y)
+    preds = model.predict(X)
+
+    actuals = data['Close'].values[1:]
+    signals = preds < y
+    actual_up = actuals > y
+
+    accuracy = (signals == actual_up).mean() * 100
     duration = time.time() - start
-    signals = preds > X_test[:, 0]
-    actual_up = y_test > X_test[:, 0]
-    accuracy = np.mean(signals == actual_up) * 100 if len(signals) > 0 else 0.0
-    profit = (y_test - X_test[:, 0])[signals].sum() if np.any(signals) else 0.0
-    trades = X_test[:, 0][signals] if np.any(signals) else np.array([])
-    roi = (profit / trades.sum()) * 100 if trades.sum() else 0.0
-    return {"accuracy": accuracy, "roi": roi, "duration": duration}
-#
+    return {"accuracy": accuracy, "duration": duration}
+
+

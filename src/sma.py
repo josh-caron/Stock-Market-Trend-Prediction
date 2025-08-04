@@ -35,26 +35,26 @@ def sma_signal(df, window=50):
         signal = "BUY (Price > SMA)" if current_price > current_sma else "SELL (Price < SMA)"
     return {"current": current_price, "sma": current_sma if not pd.isna(current_sma) else None, "signal": signal}
 
+
 def evaluate_sma(df, window=50):
+    import time
     start = time.time()
     data = df.copy()
     data['SMA'] = data['Close'].rolling(window=window).mean()
     data = data.dropna().reset_index(drop=True)
 
-    prices = data['Close'].values.flatten()
-    sma = data['SMA'].values.flatten()
+    prices = data['Close'].values
+    sma = data['SMA'].values
     signals = prices > sma
+
     if len(prices) < 2:
-        return {"accuracy": 0.0, "roi": 0.0, "duration": 0.0}
+        return {"accuracy": 0.0, "duration": 0.0}
+
+    current_prices = prices[:-1]
     next_prices = prices[1:]
-    prices = prices[:-1]
     signals = signals[:-1]
-    actual_up = next_prices > prices
+    actual_up = next_prices > current_prices
 
     accuracy = (signals == actual_up).mean() * 100 if len(signals) > 0 else 0.0
-    profit = (next_prices - prices)[signals].sum() if np.any(signals) else 0.0
-    trades = prices[signals] if np.any(signals) else np.array([])
-    roi = (profit / trades.sum()) * 100 if trades.sum() else 0.0
     duration = time.time() - start
-    return {"accuracy": accuracy, "roi": roi, "duration": duration}
-#
+    return {"accuracy": accuracy, "duration": duration}

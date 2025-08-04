@@ -38,8 +38,8 @@ def print_comparison(sma_metrics, lr_metrics):
     print("|---------------|---------------|-------------------|")
     print(f"| Accuracy      | {sma_metrics['accuracy']:.1f}%       | {lr_metrics['accuracy']:.1f}%             |")
     print(f"| Speed         | {sma_metrics['duration']:.2f} sec    | {lr_metrics['duration']:.2f} sec       |")
-    print(f"| Simulated ROI | {sma_metrics['roi']:.1f}%       | {lr_metrics['roi']:.1f}%            |")
     print("\nConclusion: Linear Regression is more accurate but slower.\n")
+
 
 def main():
     df = None
