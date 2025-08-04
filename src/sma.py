@@ -51,3 +51,4 @@ def evaluate_sma(df, window=50):
     roi = (profit / trades.sum()) * 100 if trades.sum() else 0.0
     duration = time.time() - start
     return {"accuracy": accuracy, "roi": roi, "duration": duration}
+#test end
