@@ -17,6 +17,7 @@ def compute_sma(df, window=50):
     plt.grid(True)
     plt.tight_layout()
     plt.savefig('plots/sma_plot.png')
+    plt.show()
     plt.close()
 
 def sma_signal(df, window=50):

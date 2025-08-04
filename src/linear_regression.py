@@ -36,6 +36,7 @@ def train_and_predict(df):
         plt.grid(True)
         plt.tight_layout()
         plt.savefig('plots/lr_plot.png')
+        plt.show()
         plt.close()
 
 def regression_signal(df):
