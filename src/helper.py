@@ -7,3 +7,4 @@ def load_stock_data(symbol, start="2022-01-01", end="2025-01-01"):
     df.dropna(inplace=True)
     df.reset_index(inplace=True)
     return df
+#

@@ -85,3 +85,4 @@ def evaluate_regression(df):
     trades = X_test[:, 0][signals] if np.any(signals) else np.array([])
     roi = (profit / trades.sum()) * 100 if trades.sum() else 0.0
     return {"accuracy": accuracy, "roi": roi, "duration": duration}
+#
