@@ -19,6 +19,7 @@ def main():
     lr_metrics = None
 
     while True:
+        print()
         choice = display_menu()
         if choice == '1':
             ticker = input("Enter the ticker of the stock you want to predict: ")
@@ -39,8 +40,9 @@ def main():
                 print(f"Current Price: ${sma_last['current']:.2f}")
                 print(f"SMA: ${sma_last['sma']:.2f}")
                 print(f"Signal: {sma_last['signal']}")
-            input("\n[Press 'V' to view graph | Any key to continue...]\n")
-            compute_sma(df)
+            choice_v = input("\n[Press 'V' to view graph | Any key to continue...]\n")
+            if choice_v.strip().lower() == 'v':
+                compute_sma(df)
         elif choice == '3':
             if df is None:
                 print("\nPlease load the dataset first.\n")
@@ -56,8 +58,9 @@ def main():
                 print("\nRegression Coefficients:")
                 print(f"- Slope (m): {lr_last['slope']:.2f}")
                 print(f"- Intercept (b): {lr_last['intercept']:.2f}")
-            input("\n[Press 'V' to view graph | Any key to continue...]\n")
-            train_and_predict(df)
+            choice_v = input("\n[Press 'V' to view graph | Any key to continue...]\n")
+            if choice_v.strip().lower() == 'v':
+                train_and_predict(df)
         elif choice == '4':
             if df is None:
                 print("\nPlease load the dataset first.\n")
