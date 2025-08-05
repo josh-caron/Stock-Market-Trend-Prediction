@@ -1,33 +1,27 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from sklearn.linear_model import LinearRegression
-
-def plot_combined(df, window=50):
-    df = df.copy()
-    df[f'SMA_{window}'] = df['Close'].rolling(window=window).mean()
-
-    # For regression prediction (next day), align prediction to original index
-    data = df.copy()
-    data['Prev_Close'] = data['Close'].shift(1)
-    data = data.dropna().reset_index(drop=True)
-    if len(data) < 2:
+def plot_combined(data, window=50):
+    import matplotlib.pyplot as plt
+    # Compute SMA
+    prices = [row["Close"] for row in data]
+    dates = [row["Date"] for row in data]
+    sma = []
+    for i in range(len(prices)):
+        if i < window - 1:
+            sma.append(None)
+        else:
+            avg = sum(prices[i-window+1:i+1]) / window
+            sma.append(avg)
+    # Linear regression prediction
+    if len(prices) < 3:
         print("Not enough data for regression to show combined graph!")
         return
-
-    X = data[['Prev_Close']].values.flatten().reshape(-1,1)
-    y = data['Close'].values.flatten()
-    model = LinearRegression().fit(X, y)
-    reg_preds = model.predict(X)
-    # reg_preds aligns with data, which is shorter than df because of .shift and dropna
-    # So, pad with NaN for the rows at the start
-    reg_full = [np.nan] * (len(df) - len(reg_preds)) + list(reg_preds)
-
+    prev = prices[:-1]
+    curr = prices[1:]
+    m, b = fit_linear_regression(prev, curr)
+    preds = [None] + [m * x + b for x in prev]  # shift by 1
     plt.figure(figsize=(12, 6))
-    plt.plot(df['Date'], df['Close'], label='Close Price', color='royalblue', linewidth=1)
-    valid_sma = ~df[f'SMA_{window}'].isna()
-    plt.plot(df['Date'][valid_sma], df[f'SMA_{window}'][valid_sma], label=f'SMA {window}', color='red', linewidth=2.5)
-    plt.plot(df['Date'], reg_full, label='Linear Regression Predicted', color='green', linestyle='--', linewidth=2)
+    plt.plot(dates, prices, label="Close Price", color="royalblue", linewidth=1)
+    plt.plot(dates, [v if v is not None else float('nan') for v in sma], label=f"SMA {window}", color="red", linewidth=2.5)
+    plt.plot(dates, [v if v is not None else float('nan') for v in preds], label="LR Predicted", color="green", linestyle='--', linewidth=2)
     plt.legend()
     plt.title('Actual vs SMA vs Linear Regression')
     plt.xlabel('Date')
@@ -36,3 +30,13 @@ def plot_combined(df, window=50):
     plt.tight_layout()
     plt.show()
     plt.close()
+
+def fit_linear_regression(x, y):
+    n = len(x)
+    mean_x = sum(x) / n
+    mean_y = sum(y) / n
+    num = sum((x[i] - mean_x) * (y[i] - mean_y) for i in range(n))
+    den = sum((x[i] - mean_x) ** 2 for i in range(n))
+    m = num / den if den != 0 else 0.0
+    b = mean_y - m * mean_x
+    return m, b
