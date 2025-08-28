@@ -40,51 +40,54 @@ def print_comparison(sma_metrics, lr_metrics):
     print(f"| Speed         | {sma_metrics['duration']:.2f} sec    | {lr_metrics['duration']:.2f} sec       |")
     print("\nConclusion: Linear Regression is more accurate but slower.\n")
 
+
 def main():
-    data = None
+    df = None
+
     while True:
         print()
         choice = display_menu()
         if choice == '1':
             ticker = input("Enter the ticker of the stock you want to predict: ")
-            data = load_stock_data(ticker)
-            print(f"\nDataset for {ticker.upper()} loaded with {len(data)} rows.\n")
+            df = load_stock_data(ticker)
+            print(f"\nDataset for {ticker.upper()} loaded with {len(df)} rows.\n")
         elif choice == '2':
-            if data is None:
+            if df is None:
                 print("\nPlease load the dataset first.\n")
                 continue
-            sma_last = sma_signal(data)
+            sma_last = sma_signal(df)
             print_sma_results(sma_last)
             choice_v = input("\n[Press 'V' to view graph | Any key to continue...]\n")
             if choice_v.strip().lower() == 'v':
-                compute_sma(data)
+                compute_sma(df)
         elif choice == '3':
-            if data is None:
+            if df is None:
                 print("\nPlease load the dataset first.\n")
                 continue
-            lr_last = regression_signal(data)
+            lr_last = regression_signal(df)
             print_lr_results(lr_last)
             choice_v = input("\n[Press 'V' to view graph | Any key to continue...]\n")
             if choice_v.strip().lower() == 'v':
-                train_and_predict(data)
+                train_and_predict(df)
         elif choice == '4':
-            if data is None:
+            if df is None:
                 print("\nPlease load the dataset first.\n")
                 continue
-            sma_last = sma_signal(data)
-            lr_last = regression_signal(data)
-            sma_metrics = evaluate_sma(data)
-            lr_metrics = evaluate_regression(data)
+            sma_last = sma_signal(df)
+            lr_last = regression_signal(df)
+            sma_metrics = evaluate_sma(df)
+            lr_metrics = evaluate_regression(df)
             print_sma_results(sma_last)
             print_lr_results(lr_last)
             print_comparison(sma_metrics, lr_metrics)
             choice_v = input("[Press 'S' for SMA graph, 'L' for LR graph, 'B' for BOTH, Any key to continue...]\n")
             if choice_v.strip().lower() == 's':
-                compute_sma(data)
+                compute_sma(df)
             elif choice_v.strip().lower() == 'l':
-                train_and_predict(data)
+                train_and_predict(df)
             elif choice_v.strip().lower() == 'b':
-                plot_combined(data)
+                plot_combined(df)
+
         elif choice == '5':
             print("\nExiting program. Goodbye!\n")
             break
@@ -93,3 +96,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+#
